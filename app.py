@@ -14,7 +14,7 @@ import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 
 
-######################################### GOOGLE DETAILS RETRIEVE ####################################
+######################################### EXPIRED USERS INSTANCE BLOCK LOGIC ####################################
 
 def existing_users_details(exisitng_users_email):
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -27,20 +27,45 @@ def existing_users_details(exisitng_users_email):
     df_1 = pd.DataFrame(wks_1.get_all_records())
     df_2 = pd.DataFrame(wks_2.get_all_records())
 
-    for index, name in enumerate(df_1['Customer Email ']):
+    for index, name in enumerate(df_2['Customer Email ']):
         if name == exisitng_users_email:
-            existing_training_name = df_1.iloc[index]['Traininig ']
-            existing_package_name = df_1.iloc[index]['Package']
-            isExpired = df_1.iloc[index]['Access Expired / Valid']
+            existing_training_name = df_2.iloc[index]['Traininig ']
+            existing_package_name = df_2.iloc[index]['Package']
+            isExpired = df_2.iloc[index]['Access Expired / Not']
 
-            global training
+            global training1
             if existing_training_name == 'None':
-                training = existing_package_name
-            if existing_package_name == 'No Package':
-                training = existing_training_name
+                training1 = existing_package_name
+            if existing_package_name == 'None' or existing_package_name == 'No Package':
+                training1 = existing_training_name
 
-        return training, isExpired
+            return training1, isExpired
 
+
+def block_trainings_mappings(email_address):
+
+    training, isExpired = existing_users_details(email_address)
+    if isExpired == "Blocked":
+        if training == 'fusion_payroll_training':
+            return [239,161,25,286]
+    else:
+        return "None"
+
+def block_training(users_emaail_address):
+    xpath_number = block_trainings_mappings(users_emaail_address)
+    print(xpath_number)
+    if not xpath_number == "None":
+        for i in xpath_number:
+            isChecked = driver.find_element_by_css_selector(
+                "input[id*='1group_{no1}'][name^='jform[groups][]'][type='checkbox'][value='no2']".format(no1=i, no2=i)).get_attribute(
+                "checked")
+            if isChecked == 'true':
+                oracle_fusion_financials_training = driver.find_element_by_xpath('//*[@id="1group_{no3}"]'.format(no3=i))
+                driver.execute_script("arguments[0].click();", oracle_fusion_financials_training)
+
+    else:
+        print("pass")
+        pass
 
 ######################################### SINGLES #######################################################
 def oracle_workflow_training_single(isSelfPaced):
@@ -4563,7 +4588,8 @@ def joomla(customer_email):
             isPackage = False
             isSelfPaced = None
             single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_payroll_training_single(isSelfPaced)
+            block_training(customer_email)
+            # fusion_payroll_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
             google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
