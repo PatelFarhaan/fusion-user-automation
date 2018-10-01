@@ -9,7 +9,37 @@ from mails.fusion_mail import fusion_email
 from mails.ebs_mail_existing import ebs_email_exist
 from google_sheet.google import google_sheet_update
 from mails.fusion_mail_existing import fusion_email_exist
+import gspread
+import pandas as pd
+from oauth2client.service_account import ServiceAccountCredentials
 
+
+######################################### GOOGLE DETAILS RETRIEVE ####################################
+
+def existing_users_details(exisitng_users_email):
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    credentials = ServiceAccountCredentials.from_json_keyfile_name('REDACTED_SERVICE_ACCOUNT_FILE.json',
+                                                                   scope)
+    gc = gspread.authorize(credentials)
+    wks_1 = gc.open('Retail Customers - Self Paced ').worksheet('SP 2017')
+    wks_2 = gc.open('Retail Customers - Self Paced ').worksheet('SP 2018')
+
+    df_1 = pd.DataFrame(wks_1.get_all_records())
+    df_2 = pd.DataFrame(wks_2.get_all_records())
+
+    for index, name in enumerate(df_1['Customer Email ']):
+        if name == exisitng_users_email:
+            existing_training_name = df_1.iloc[index]['Traininig ']
+            existing_package_name = df_1.iloc[index]['Package']
+            isExpired = df_1.iloc[index]['Access Expired / Valid']
+
+            global training
+            if existing_training_name == 'None':
+                training = existing_package_name
+            if existing_package_name == 'No Package':
+                training = existing_training_name
+
+        return training, isExpired
 
 
 ######################################### SINGLES #######################################################
