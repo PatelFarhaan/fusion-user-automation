@@ -2,6 +2,8 @@ import json
 import time
 import string
 import random
+import gspread
+import pandas as pd
 import urllib.request
 from selenium import webdriver
 from mails.ebs_mail import ebs_email
@@ -9,26 +11,21 @@ from mails.fusion_mail import fusion_email
 from mails.ebs_mail_existing import ebs_email_exist
 from google_sheet.google import google_sheet_update
 from mails.fusion_mail_existing import fusion_email_exist
-import gspread
-import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 
 
 ######################################### EXPIRED USERS INSTANCE BLOCK LOGIC ####################################
 
-def existing_users_details(exisitng_users_email):
+def existing_users_block(email_address):
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     credentials = ServiceAccountCredentials.from_json_keyfile_name('REDACTED_SERVICE_ACCOUNT_FILE.json',
                                                                    scope)
     gc = gspread.authorize(credentials)
-    wks_1 = gc.open('Retail Customers - Self Paced ').worksheet('SP 2017')
     wks_2 = gc.open('Retail Customers - Self Paced ').worksheet('SP 2018')
-
-    df_1 = pd.DataFrame(wks_1.get_all_records())
     df_2 = pd.DataFrame(wks_2.get_all_records())
 
     for index, name in enumerate(df_2['Customer Email ']):
-        if name == exisitng_users_email:
+        if name == email_address:
             existing_training_name = df_2.iloc[index]['Traininig ']
             existing_package_name = df_2.iloc[index]['Package']
             isExpired = df_2.iloc[index]['Access Expired / Not']
@@ -41,31 +38,283 @@ def existing_users_details(exisitng_users_email):
 
             return training1, isExpired
 
+        else:
+            return "None1", "None2"
+
 
 def block_trainings_mappings(email_address):
-
-    training, isExpired = existing_users_details(email_address)
+    training, isExpired = existing_users_block(email_address)
+    if training == "None1" and isExpired == "None2":
+        return "None3"
     if isExpired == "Blocked":
-        if training == 'fusion_payroll_training':
+
+        if training == 'oracle_fusion_fundamentals_training' or training == 'Oracle Fusion Applications Fundamentals Training' or training == 'Oracle Fusion Application Foundation/Fundamental Training':
+            return [44,161,25,286]
+
+        if training == 'fusion_hcm_core_training' or training == 'HCM Core Implmenetation Training':
+            return [35,161,25,286]
+
+        if training == 'oracle_fusion_talent_management_training' or training == 'Oracle Fusion Talent Management Training' or training == 'Fusion Talent Management Traininig':
+            return [30,161,25,286]
+
+        if training == 'oracle_fusion_benefits_training_1' or training == 'Fusion Benefits Training' or training == 'oracle_fusion_benefits_training_2':
+            return [64,283,161,25,286]
+
+        if training == 'fusion_payroll_training' or training == 'Fusion Payroll Training':
             return [239,161,25,286]
-    else:
-        return "None"
+
+        if training == 'oracle_fusion_fastformula' or training == 'Fast Formula Training':
+            return [45,161,25,286]
+
+        if training == 'oracle_fusion_compensation_workbench' :
+            return [29,161,25,286]
+
+        if training == 'oracle_fusion_hcm_approval_management' :
+            return [240,161,25,286]
+
+        if training == 'oracle_fusion_time_and_labour_training' or training == 'Fusion OTL Training':
+            return [241,161,25,286]
+
+        if training == 'fusion_hcm_for_ebs_hcm_experts_training' or training == 'HCM + Payroll Training':
+            return [245,161,25,286]
+
+        if training == 'fusion_procurement_training' or training == 'Fusion Procurement Training':
+            return [39,161,25,286]
+
+        if training == 'oracle_fusion_hcm_technical_training' or training == 'HCM Technical Training':
+            return [277,161,25,286]
+
+        if training == 'oracle_fusion_financials_accounting_hub_training_1' or training == 'oracle_fusion_financials_accounting_hub_training_2':
+            return [259,46,161,25,286]
+
+        if training == 'oracle_fusion_procure_to_pay_training' or training == 'Oracle Fusion Procure To Pay Training':
+            return [62,161,25,286]
+
+        if training == 'fusion_application_installation_and_patching_R9_training' :
+            return [115,161,25,286]
+
+        if training == 'development_in_fusion_applications' :
+            return [83,161,25,286]
+
+        if training == 'oracle_fusion_financials_training' or training == 'Oracle Fusion Financials Training':
+            return [50,161,25,286]
+
+        if training == 'oracle_BI_reproting_and_OTBI_training_in_fusion_apps_1' or training == 'Oracle BI Reporting and OTBI Training in Fusion Apps' or training == 'oracle_BI_reproting_and_OTBI_training_in_fusion_apps_2':
+            return [123,135,161,25,286]
+
+        if training == 'oracle_fusion_accounts_receivable_training' :
+            return [229,161,25,286]
+
+        if training == 'oracle_fusion_financials_cloud_tax_training' :
+            return [256,161,25,286]
+
+        if training == 'oracle_apps_DBA' or training == 'Apps DBA Training ':
+            return [145,161,25]
+
+        if training == 'oracle_EBS_R12_inventory_order_management_and_purchasing_training' or training == 'Oracle EBS R12 Inventory Order Management & Purchasing Training':
+            return [49,161,25]
+
+        if training == 'oracle_R12_subledger_accounting_training' :
+            return [43,161,25]
+
+        if training == 'oracle_EBS_R12_functional_financial_training' or training == 'Oracle Functional Financials Training EBS R12':
+            return [117,161,25]
+
+        if training == 'OA_framework_training' :
+            return [41,161,25]
+
+        if training == 'R12_advanced_global_intercompany_system_AGIS_training' :
+            return [48,161,25]
+
+        if training == 'oracle_EBusiness_tax_training_1' or training == 'Oracle E-Business TAX Training' or training == 'oracle_EBusiness_tax_training_2':
+            return [128,252,161,25]
+
+        if training == 'oracle_demantra_training' :
+            return [65,161,25]
+
+        if training == 'oracle_R12_HRMS_payroll_training' or training == 'R12 HRMS Payroll Training':
+            return [144,161,25]
+
+        if training == 'oracle_implement_configurator_training' :
+            return [149,161,25]
+
+        if training == 'oracle_R12_project_accounting_training' :
+            return [138,161,25]
+
+        if training == 'oracle_R12_advance_supply_chain_planning_training' :
+            return [137,161,25]
+
+        if training == 'oracle_R12_financial_accounting_hub_training' or training == 'EBS FAH Training':
+            return [136,161,25]
+
+        if training == 'oracle_business_intelligence_applications_training' :
+            return [131,161,25]
+
+        if training == 'oracle_business_intelligence_enterprise_edition_training' or training == 'OBIEE Training':
+            return [56,161,25]
+
+        if training == 'oracle_adf_training' or training == 'ADF Training':
+            return [76,161,25]
+
+        if training == 'oracle_business_process_management_training' :
+            return [130,161,25]
+
+        if training == 'oracle_soa_BPEL_mediator_OBS_development_training_1' :
+            return [40,122,161,25]
+
+        if training == 'oracle_soa_BPEL_mediator_OBS_development_training_12C' or training == 'SOA 12c Training':
+            return [40,122,161,25]
+
+        if training == 'oracle_data_integrator_training' or training == 'ODI Training':
+            return [126,161,25]
+
+        if training == 'oracle_mobile_application_framework_training' :
+            return [113,161,25]
+
+        if training == 'oracle_java_xml_and_web_service_training' or training == 'Java Training':
+            return [129,161,25]
+
+        if training == 'oracle_sql_and_plSQL_training' :
+            return [155,161,25]
+
+        if training == 'fusion_financials_integration_training' :
+            return [253,161,25,286]
+
+        if training == 'fusion_financials_security_training_1' or training == 'fusion_financials_security_training_2' :
+            return [268,272,161,25,286]
+
+        if training == 'fusion_financials_reporting_training' :
+            return [235,161,25,286]
+
+        if training == 'fusion_financials_approval_management_training' :
+            return [209,161,25,286]
+
+        if training == 'oracle_fusion_integration_cloud_Service_training' or training == 'ICS Training':
+            return [250,161,25]
+
+        if training == 'oracle_sales_cloud_extensibility_training' :
+            return [204,161,25,286]
+
+        if training == 'oracle_fusion_account_payable_training' :
+            return [28,161,25,286]
+
+        if training == 'oracle_fusion_general_ledger_training' or training == 'General Ledger Training':
+            return [231,161,25,286]
+
+        if training == 'fusion_fixed_asset_training' :
+            return [220,161,25,286]
+
+        if training == 'oracle_fusion_project_portfolio_management_training' or training == 'Fusion PPM Training':
+            return [238,161,25,286]
+
+        if training == 'oracle_business_suit_fundamentals_training' :
+            return [194,161,25,286]
+
+        if training == 'oracle_R12_iprocurement_training' :
+            return [212,161,25]
+
+        if training == 'oracle_ebs_R12_service_contract_training' :
+            return [206,161,25]
+
+        if training == 'oracle_ebs_R12_fixed_assets_training' :
+            return [216,161,25]
+
+        if training == 'oracle_transportation_management_training' or training == 'OTM Training':
+            return [219,161,25]
+
+        if training == 'oracle_demantra_ptp_training' :
+            return [263,161,25]
+
+        if training == 'oracle_identity_management_training' or training == 'Oracle Identity Manager Training':
+            return [50,161,25]
+
+        if training == 'oracle_access_manager_training' :
+            return [73,161,25]
+
+        if training == 'oracle_weblogic_administrator_training' :
+            return [47,161,25]
+
+        if training == 'oracle_entitlement_server_training' or training == 'OES Training':
+            return [159,161,25]
+
+        if training == 'fusion_middleware_12C_training' :
+            return [134,161,25]
+
+        if training == 'oracle_goldengate_training' :
+            return [66,161,25]
+
+        if training == 'oracle_database_12C_advanced_admininstration_training' :
+            return [171,161,25]
+
+        if training == 'oracle_data_guard_administration_training' :
+            return [177,161,25]
+
+        if training == 'r12_approval_management_training_2' or training == 'r12_approval_management_training_1' or training == 'EBS_AME Training':
+            return [156,230,161,25]
+
+        if training == 'ebusiness_suit_development_erp_training' :
+            return [153,161,25]
+
+        if training == 'workflow_training' or training == 'Oracle Workflow Builder Training':
+            return [172,161,25]
+
+        if training == 'bi_publisher_training' or training == 'BI Publisher Training':
+            return [154,161,25]
+
+        if training == 'ebs_techno_functional_training' :
+            return [243,161,25]
+
+        if training == 'fusion_hcm_reporting_training' or training == 'Fusion HCM Reporting Training':
+            return [279,161,25,286]
+
+        if training == 'oracle_fusion_hcm_integration_training' :
+            return [19,161,25,286]
+
+        if training == 'fusion_security_training' :
+            return [273,161,25,286]
+
+        if training == 'oracle_taleo_recruting_and_onboarding_training' :
+            return [181,161,25]
+
+        if training == 'oracle_taleo_tcc_training' or training == 'Taleo Connect Client Training':
+            return [202,161,25]
+
+        if training == 'oracle_taleo_integration_training' :
+            return [192,161,25]
+
+        if training == 'r1213_administration_training' :
+            return [201,161,25]
+
+        if training == 'Siebel_openUI_training' :
+            return [54,161,25]
+
+        if training == 'hyperion_financials_management_hfm_training' :
+            return [79,161,25]
+
+        if training == 'hyperion_planning_training' or training == 'Hyperion Planning Training':
+            return [63,161,25]
+
+        if training == 'mastering_hyperion_calculation_manager' :
+            return [182,161,25]
+
+        if training == 'oracle_fusion_scm_training' or training == 'Fusion SCM Training':
+            return [237,161,25,286]
+
 
 def block_training(users_emaail_address):
     xpath_number = block_trainings_mappings(users_emaail_address)
-    print(xpath_number)
-    if not xpath_number == "None":
-        for i in xpath_number:
-            isChecked = driver.find_element_by_css_selector(
-                "input[id*='1group_{no1}'][name^='jform[groups][]'][type='checkbox'][value='no2']".format(no1=i, no2=i)).get_attribute(
-                "checked")
-            if isChecked == 'true':
-                oracle_fusion_financials_training = driver.find_element_by_xpath('//*[@id="1group_{no3}"]'.format(no3=i))
-                driver.execute_script("arguments[0].click();", oracle_fusion_financials_training)
+    if xpath_number == "None3":
+        pass
 
     else:
-        print("pass")
-        pass
+        if not xpath_number == "None":
+            for i in xpath_number:
+                isChecked = driver.find_element_by_css_selector(
+                    "input[id*='1group_{no1}'][name^='jform[groups][]'][type='checkbox'][value='no2']".format(no1=i, no2=i)).get_attribute(
+                    "checked")
+                if isChecked == 'true':
+                    dynamic_trining_blocker = driver.find_element_by_xpath('//*[@id="1group_{no3}"]'.format(no3=i))
+                    driver.execute_script("arguments[0].click();", dynamic_trining_blocker)
 
 ######################################### SINGLES #######################################################
 def oracle_workflow_training_single(isSelfPaced):
@@ -4533,6 +4782,8 @@ def joomla(customer_email):
         assigned_users_groups = driver.find_element_by_xpath(
             '/html/body/div[2]/section/div/div/form/fieldset/ul/li[2]/a').click()
         time.sleep(2)
+
+        block_training(customer_email)
 ######################################################### SINGLE TRAININGS ##################################################
         if sku == 'Fusion Apps Foundation':
             sheet_package = 'oracle_fusion_fundamentals_training'
@@ -4588,8 +4839,7 @@ def joomla(customer_email):
             isPackage = False
             isSelfPaced = None
             single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            block_training(customer_email)
-            # fusion_payroll_training_single(isSelfPaced)
+            fusion_payroll_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
             google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
@@ -6988,7 +7238,7 @@ if payment_status == 'ACCEPTED':
     options.add_argument('--disable-gpu')
     options.add_argument("--log-level=3")
     options.add_argument("--start-maximized")
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
 
 
     driver = webdriver.Chrome(executable_path='/mnt/d/Users/hp/Python/Scripts/chromedriver.exe',
