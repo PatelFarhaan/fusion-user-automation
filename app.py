@@ -7238,11 +7238,9 @@ if payment_status == 'ACCEPTED':
     options.add_argument('--disable-gpu')
     options.add_argument("--log-level=3")
     options.add_argument("--start-maximized")
-    options.add_argument('--headless')
+    # options.add_argument('--headless')
 
-
-    driver = webdriver.Chrome(executable_path='/mnt/d/Users/hp/Python/Scripts/chromedriver.exe',
-                              chrome_options=options)
+    driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", chrome_options=options)
     joomla(customer_email)
 
 else:
