@@ -304,6 +304,7 @@ def block_trainings_mappings(email_address):
 def block_training(users_emaail_address):
     xpath_number = block_trainings_mappings(users_emaail_address)
     if xpath_number == "None3":
+        print("pass")
         pass
 
     else:
@@ -315,6 +316,8 @@ def block_training(users_emaail_address):
                 if isChecked == 'true':
                     dynamic_trining_blocker = driver.find_element_by_xpath('//*[@id="1group_{no3}"]'.format(no3=i))
                     driver.execute_script("arguments[0].click();", dynamic_trining_blocker)
+
+        print ("proper execution")
 
 ######################################### SINGLES #######################################################
 def oracle_workflow_training_single(isSelfPaced):
@@ -426,7 +429,7 @@ def fusion_hcm_core_training_single(isSelfPaced):
 
 
 def oracle_fusion_talent_management_training_single(isSelfPaced):
-block_trainings_mappings
+
     isChecked = driver.find_element_by_css_selector(
         "input[id*='1group_30'][name^='jform[groups][]'][type='checkbox'][value='30']").get_attribute("checked")
     if not isChecked == 'true':
@@ -7238,7 +7241,7 @@ if payment_status == 'ACCEPTED':
     options.add_argument('--disable-gpu')
     options.add_argument("--log-level=3")
     options.add_argument("--start-maximized")
-    options.add_argument('--headless')
+    # options.add_argument('--headless')
 
     driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", chrome_options=options)
     joomla(customer_email)
