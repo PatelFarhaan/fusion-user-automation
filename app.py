@@ -426,7 +426,7 @@ def fusion_hcm_core_training_single(isSelfPaced):
 
 
 def oracle_fusion_talent_management_training_single(isSelfPaced):
-
+block_trainings_mappings
     isChecked = driver.find_element_by_css_selector(
         "input[id*='1group_30'][name^='jform[groups][]'][type='checkbox'][value='30']").get_attribute("checked")
     if not isChecked == 'true':
