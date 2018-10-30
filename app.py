@@ -2,15 +2,16 @@ import json
 import time
 import string
 import random
+import gspread
+import pandas as pd
 import urllib.request
+from flask import Flask
 from selenium import webdriver
 from mails.ebs_mail import ebs_email
 from mails.fusion_mail import fusion_email
 from mails.ebs_mail_existing import ebs_email_exist
 from google_sheet.google import google_sheet_update
 from mails.fusion_mail_existing import fusion_email_exist
-import gspread
-import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 
 
@@ -4471,2516 +4472,2523 @@ def Unlimited_Oracle_training_Package():
     save_and_close = driver.find_element_by_xpath('/html/body/div[1]/div/div/div[2]/div/div/div[1]/button').click()
     driver.quit()
 
+###########################################################################################################################################################################################
 
+app = Flask(__name__)
 
-def joomla(customer_email):
-    driver.get('http://www.REDACTED_DOMAIN/administrator')
+@app.route("/<order_id>")
+def main(order_id):
 
-    email = driver.find_element_by_xpath('//*[@id="mod-login-username"]')
-    email.send_keys('REDACTED_USERNAME')
-    time.sleep(2)
+    response = urllib.request.urlopen(
+        'https://app.ecwid.com/api/v1/5315285/orders?secure_auth_key=e2KMvkdGa1FG&order={number}'.format(number=order_id))
+    data = json.loads(response.read())
 
-    password = driver.find_element_by_xpath('//*[@id="mod-login-password"]')
-    password.send_keys('REDACTED_JOOMLA_PASSWORD')
-    time.sleep(2)
+    number = data['orders'][0]['number']
+    payment_status = data['orders'][0]['paymentStatus']
+    customer_name = data['orders'][0]['customerName']
+    customer_email = data['orders'][0]['customerEmail']
+    sku = data['orders'][0]['items'][0]['sku']
+    value = data['orders'][0]['items'][0]['options'][0]['value']
 
-    submit = driver.find_element_by_xpath('//*[@id="form-login"]/fieldset/div[3]/div/div/button')
-    submit.click()
-    time.sleep(2)
+    if payment_status == 'ACCEPTED':
 
-    email = driver.find_element_by_xpath('//*[@id="mod-login-username"]')
-    email.send_keys('REDACTED_USERNAME')
-    time.sleep(2)
+        random_String = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=4))
+        random_password = ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase, k=8))
+        first_name = customer_name.split()[0]
+        customer_username = "sp_{name1}_{name2}".format(name1=first_name, name2=random_String)
 
-    password = driver.find_element_by_xpath('//*[@id="mod-login-password"]')
-    password.send_keys('REDACTED_JOOMLA_PASSWORD')
-    time.sleep(2)
+        ################################################ JOOMLA ################################################################################
+        driver.get('http://www.REDACTED_DOMAIN/administrator')
 
-    submit = driver.find_element_by_xpath('//*[@id="form-login"]/fieldset/div[3]/div/div/button')
-    submit.click()
-    time.sleep(2)
-
-    users_click = driver.find_element_by_xpath('/html/body/nav/div/div/div/ul[1]/li[2]/a').click()
-    time.sleep(2)
-
-    manage_click = driver.find_element_by_xpath('/html/body/nav/div/div/div/ul[1]/li[2]/ul/li[1]/a').click()
-    time.sleep(2)
-
-    users_search = driver.find_element_by_xpath('//*[@id="filter_search"]')
-    users_search.send_keys(customer_email)
-    time.sleep(1)
-
-    users_search_click = driver.find_element_by_xpath(
-        '/html/body/div[2]/section/div/div/form/div[2]/div[1]/div[1]/div[1]/div[1]/button').click()
-    time.sleep(2)
-
-    try:
-        isBlocked = driver.find_element_by_xpath('//*[@id="userList"]/tbody/tr/td[4]/a').get_attribute("data-original-title")
-        if isBlocked == 'Unblock':
-            unblock = driver.find_element_by_xpath('//*[@id="userList"]/tbody/tr/td[4]/a/span').click()
+        email = driver.find_element_by_xpath('//*[@id="mod-login-username"]')
+        email.send_keys('REDACTED_USERNAME')
         time.sleep(2)
 
-        found_user = driver.find_element_by_xpath(
-            '/html/body/div[2]/section/div/div/form/div[2]/table/tbody/tr/td[2]/div[1]/a')
-        found_user.click()
+        password = driver.find_element_by_xpath('//*[@id="mod-login-password"]')
+        password.send_keys('REDACTED_JOOMLA_PASSWORD')
         time.sleep(2)
 
-        login_name = driver.find_element_by_xpath('//*[@id="jform_username"]').get_attribute('value')
+        submit = driver.find_element_by_xpath('//*[@id="form-login"]/fieldset/div[3]/div/div/button')
+        submit.click()
         time.sleep(2)
 
-        existing_customer_username = driver.find_element_by_xpath('//*[@id="jform_username"]').get_attribute('value')
-
-        assigned_users_groups = driver.find_element_by_xpath(
-            '/html/body/div[2]/section/div/div/form/fieldset/ul/li[2]/a').click()
-        time.sleep(2)
-######################################################### SINGLE TRAININGS ##################################################
-        if sku == 'Fusion Apps Foundation':
-            sheet_package = 'oracle_fusion_fundamentals_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_fundamentals_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM Core Functional':
-            sheet_package = 'fusion_hcm_core_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_hcm_core_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Talent Management':
-            sheet_package = 'oracle_fusion_talent_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_talent_management_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Benefits':
-            sheet_package = 'oracle_fusion_benefits_training_1'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_benefits_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Payroll':
-            sheet_package = 'fusion_payroll_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            block_training(customer_email)
-            # fusion_payroll_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion Fast Formula Training':
-            sheet_package = 'oracle_fusion_fastformula'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_fastformula_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Compensation Workbench':
-            sheet_package = 'oracle_fusion_compensation_workbench'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_compensation_workbench_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion HCM Approval Management':
-            sheet_package = 'oracle_fusion_hcm_approval_management'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_hcm_approval_management_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Time & Labour (OTL)':
-            sheet_package = 'oracle_fusion_time_and_labour_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_time_and_labour_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'EBS HCM Experts':
-            sheet_package = 'fusion_hcm_for_ebs_hcm_experts_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_hcm_for_ebs_hcm_experts_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Procurement':
-            sheet_package = 'fusion_procurement_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORDpr0c'
-            fusion_procurement_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM technical Training':
-            sheet_package = 'oracle_fusion_hcm_technical_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_hcm_technical_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Accounting Hub':
-            sheet_package = 'oracle_fusion_financials_accounting_hub_training_1'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_financials_accounting_hub_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Procure to Pay':
-            sheet_package = 'oracle_fusion_procure_to_pay_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_procure_to_pay_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Applications Installation & Patching R9':
-            sheet_package = 'fusion_application_installation_and_patching_R9_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_application_installation_and_patching_R9_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Development In Fusion Applications':
-            sheet_package = 'development_in_fusion_applications'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            development_in_fusion_applications_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Financials':
-            sheet_package = 'oracle_fusion_financials_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_financials_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'Oracle Fusion HCM Reporting Training':
-        #     sheet_package = 'oracle_BI_reproting_and_OTBI_training_in_fusion_apps_1'
-        #     isFusion = True
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     oracle_BI_reproting_and_OTBI_training_in_fusion_apps_single(isSelfPaced)
-        #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-        #                        single_training_password)
-        #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Fusion Account Receivables':
-            sheet_package = 'oracle_fusion_accounts_receivable_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_accounts_receivable_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion e-biz Tax':
-            sheet_package = 'oracle_fusion_financials_cloud_tax_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_financials_cloud_tax_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Apps DBA Training':
-            sheet_package = 'oracle_apps_DBA'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_apps_DBA_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Inventory Order Management & Purchasing':
-            sheet_package = 'oracle_EBS_R12_inventory_order_management_and_purchasing_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_EBS_R12_inventory_order_management_and_purchasing_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Subledger Accounting':
-            sheet_package = 'oracle_R12_subledger_accounting_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_subledger_accounting_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle EBS Financials Functional R12':
-            sheet_package = 'oracle_EBS_R12_functional_financial_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_EBS_R12_functional_financial_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'OAF Training':
-            sheet_package = 'OA_framework_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            OA_framework_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 AGIS Training':
-            sheet_package = 'R12_advanced_global_intercompany_system_AGIS_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            R12_advanced_global_intercompany_system_AGIS_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'ORACLE E-BUSINESS TAX':
-            sheet_package = 'oracle_EBusiness_tax_training_1'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_EBusiness_tax_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Demantra':
-            sheet_package = 'oracle_demantra_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_demantra_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'ORACLE R12 HRMS PAYROLL TRAINING':
-            sheet_package = 'oracle_R12_HRMS_payroll_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_HRMS_payroll_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Implement Configurator':
-            sheet_package = 'oracle_implement_configurator_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_implement_configurator_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 Project Accounting':
-            sheet_package = 'oracle_R12_project_accounting_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_project_accounting_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 - Advanced Supply Chain Planning (ASCP) Fundamentals':
-            sheet_package = 'oracle_R12_advance_supply_chain_planning_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_advance_supply_chain_planning_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 Financials Accounting Hub Fundamentals':
-            sheet_package = 'oracle_R12_financial_accounting_hub_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_financial_accounting_hub_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Business Intelligence Applications Training':
-            sheet_package = 'oracle_business_intelligence_applications_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_business_intelligence_applications_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'oracle_business_intelligence_enterprise_edition_training':
-        #     sheet_package = 'oracle_business_intelligence_enterprise_edition_training'
-        #     isFusion = True
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     oracle_business_intelligence_enterprise_edition_training_single(isSelfPaced)
-        #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-        #                        single_training_password)
-        #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Oracle ADF Training':
-            sheet_package = 'oracle_adf_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_adf_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle BPM - Business Process Management Training':
-            sheet_package = 'oracle_business_process_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_business_process_management_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'SOA BPEL Mediator OSB 12c':
-            sheet_package = 'oracle_soa_BPEL_mediator_OBS_development_training_1'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_soa_BPEL_mediator_OBS_development_training_1_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Data Integrator ODI':
-            sheet_package = 'oracle_data_integrator_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_data_integrator_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle MAF':
-            sheet_package = 'oracle_mobile_application_framework_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_mobile_application_framework_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Java, XML and Webservices':
-            sheet_package = 'oracle_java_xml_and_web_service_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_java_xml_and_web_service_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle SQL and PL/SQL Training':
-            sheet_package = 'oracle_sql_and_plSQL_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_sql_and_plSQL_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Financial Integration':
-            sheet_package = 'fusion_financials_integration_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_financials_integration_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Security':
-            sheet_package = 'fusion_financials_security_training_1'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_financials_security_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion Financials Reporting Training':
-            sheet_package = 'fusion_financials_reporting_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_financials_reporting_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Financials Approval':
-            sheet_package = 'fusion_financials_approval_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_financials_approval_management_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Integration Cloud Service':
-            sheet_package = 'oracle_fusion_integration_cloud_Service_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_integration_cloud_Service_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Sales Cloud Extensibility':
-            sheet_package = 'oracle_sales_cloud_extensibility_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_sales_cloud_extensibility_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Account Payables':
-            sheet_package = 'oracle_fusion_account_payable_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_account_payable_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion General Ledger':
-            sheet_package = 'oracle_fusion_general_ledger_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_general_ledger_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'fusion_fixed_asset_training':
-        #     sheet_package = 'fusion_fixed_asset_training'
-        #     isFusion = True
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     fusion_fixed_asset_training_single(isSelfPaced)
-        #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-        #                        single_training_password)
-        #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion Project Portfolio Management':
-            sheet_package = 'oracle_fusion_project_portfolio_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_project_portfolio_management_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Ebusiness Suite Fundamentals':
-            sheet_package = 'oracle_business_suit_fundamentals_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_business_suit_fundamentals_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 iProcurement':
-            sheet_package = 'oracle_R12_iprocurement_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_iprocurement_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Service Contract Fundamentals':
-            sheet_package = 'oracle_ebs_R12_service_contract_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_ebs_R12_service_contract_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'oracle_ebs_R12_fixed_assets_training':
-        #     sheet_package = 'oracle_ebs_R12_fixed_assets_training'
-        #     isFusion = False
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     oracle_ebs_R12_fixed_assets_training_single(isSelfPaced)
-        #     ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-        #                        single_training_password)
-        #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Oracle Transportation Management':
-            sheet_package = 'oracle_transportation_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_transportation_management_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Demantra : Predictive Trade Planning':
-            sheet_package = 'oracle_demantra_ptp_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_demantra_ptp_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'IDM Foundation':
-            sheet_package = 'oracle_identity_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_identity_management_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Access Manager':
-            sheet_package = 'oracle_access_manager_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_access_manager_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Weblogic Training':
-            sheet_package = 'oracle_weblogic_administrator_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_weblogic_administrator_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Entitlement Server Training':
-            sheet_package = 'oracle_entitlement_server_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_entitlement_server_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion MiddleWare 12c Administration':
-            sheet_package = 'fusion_middleware_12C_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_middleware_12C_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle GoldenGate':
-            sheet_package = 'oracle_goldengate_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_goldengate_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Database 12c: New Features for Administrators Ed2':
-            sheet_package = 'oracle_database_12C_advanced_admininstration_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_database_12C_advanced_admininstration_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Database : Data Guard Administration':
-            sheet_package = 'oracle_data_guard_administration_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_data_guard_administration_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 Approvals Management Engine (AME)':
-            sheet_package = 'r12_approval_management_training_1'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            r12_approval_management_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle ERP Development':
-            sheet_package = 'ebusiness_suit_development_erp_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            ebusiness_suit_development_erp_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'Oracle Workflow Training':
-        #     sheet_package = 'workflow_training'
-        #     isFusion = False
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     workflow_training_single(isSelfPaced)
-        #     ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-        #                        single_training_password)
-        #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Oracle BI Publisher':
-            sheet_package = 'bi_publisher_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            bi_publisher_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'EBS Techno-Functional Package':
-            sheet_package = 'ebs_techno_functional_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            ebs_techno_functional_training_single(isSelfPaced)
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion HCM Reporting Training':
-            sheet_package = 'fusion_hcm_reporting_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_hcm_reporting_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Integration Training':
-            sheet_package = 'oracle_fusion_hcm_integration_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_hcm_integration_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM':
-            sheet_package = 'fusion_security_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_security_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Taleo Training':
-            sheet_package = 'oracle_taleo_recruting_and_onboarding_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_taleo_recruting_and_onboarding_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Taleo Connect Client':
-            sheet_package = 'oracle_taleo_tcc_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_taleo_tcc_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'oracle_taleo_integration_training':
-        #     sheet_package = 'oracle_taleo_integration_training'
-        #     isFusion = True
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     oracle_taleo_integration_training_single(isSelfPaced)
-        #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-        #                        single_training_password)
-        #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        # if sku == 'r1213_administration_training':
-        #     sheet_package = 'r1213_administration_training'
-        #     isFusion = False
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     r1213_administration_training_single(isSelfPaced)
-        #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-        #                        single_training_password)
-        #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Siebel open UI':
-            sheet_package = 'Siebel_openUI_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            Siebel_openUI_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Hyperion Financial Management':
-            sheet_package = 'hyperion_financials_management_hfm_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            hyperion_financials_management_hfm_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Hyperion Planning':
-            sheet_package = 'hyperion_planning_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            hyperion_planning_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Mastering Hyperion Calculation Manager with Essbase and Planning':
-            sheet_package = 'mastering_hyperion_calculation_manager'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            mastering_hyperion_calculation_manager_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-
-
-        if sku == 'OBIEE Training':
-            sheet_package = 'OBIEE Training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            obiee_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-
-        if sku == 'Oracle Workflow Training':
-            sheet_package = 'Oracle Workflow Builder Training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_workflow_training_single(isSelfPaced)
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-
-
-############################################### PACKAGES ###########################################################
-
-        if sku == 'Fusion Middleware Administration Package':
-            sheet_package = 'Fusion Middleware administration Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_middleware_administration_package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Hyperion Suite Training Package':
-            sheet_package = 'Hyperion Suit Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Hyperion_suit_training_package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM Technical Package':
-            sheet_package = 'HCM Technical Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_HCM_Technical_Package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'EBS R12 Technical training Package':
-            sheet_package = 'Oracle EBS R12 Technical Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            EBS_R12_Technical_Package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'FUsion HCM Modules PAckage':
-            sheet_package = 'Fusion HCM Modules Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_HCM_Modules_Package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'FUSION APPLICATIONS TRAINING':
-            sheet_package = 'Fusion Applications Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_Application_Training_Package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Cloud Common Technology Package':
-            sheet_package = 'Fusion Cloud Common Technology Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_cloud_common_technology_package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Financials Functional Package':
-            sheet_package = 'Fusion Financials Functional Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_financials_functional_package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Financials Technical Package':
-            sheet_package = 'Fusion Financials Technical Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_financials_technical_package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM and Taleo Functional & Technical Package':
-            sheet_package = 'FUSION HCM AND TALEO FUNCTIONAL & TECHNICAL PACKAGE'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_HCM_and_Taleo_functional_and_technical_package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM trainings':
-            sheet_package = 'Fusion HCM Modules Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_HCM_functional_package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Middleware Development Package':  #fusion access not given
-            sheet_package = 'Fusion Middleware Development Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_middleware_development_package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle EBS R12 Functional Package':
-            sheet_package = 'Oracle EBS R12 Functional Package'
-            isFusion = False
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Oracle_EBS_R12_functional_package()
-            ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'R12 + Fusion Apps Training':  # Fusion+EBS
-            sheet_package = 'Fusion + R12 Package'
-            isFusion = 'Both'
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            R12_Fusion_Apps_Training()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Unlimited Oracle Training Package':# Fusion+EBS
-            sheet_package = 'Unlimited Training Package'
-            isFusion = 'Both'
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Unlimited_Oracle_training_Package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Apps Training Package':
-            sheet_package = 'Fusion Apps Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_Apps_Training_Package()
-            fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
-                               single_training_password, isFusion)
-            google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-
-    except:
-
-        new_user = driver.find_element_by_xpath('//*[@id="toolbar-new"]/button').click()
+        email = driver.find_element_by_xpath('//*[@id="mod-login-username"]')
+        email.send_keys('REDACTED_USERNAME')
         time.sleep(2)
 
-        new_customer_name = driver.find_element_by_xpath('//*[@id="jform_name"]').send_keys(customer_name)
-        new_customer_username = driver.find_element_by_xpath('//*[@id="jform_username"]').send_keys(customer_username)
-        new_customer_password = driver.find_element_by_xpath('//*[@id="jform_password"]').send_keys(random_password)
-        conform_new_password = driver.find_element_by_xpath('//*[@id="jform_password2"]').send_keys(random_password)
-        new_customer_email = driver.find_element_by_xpath('//*[@id="jform_email"]').send_keys(customer_email)
-
-
-##############################################################  SINGLE TRAININGS #############################################################################
-
-        if sku == 'Fusion Apps Foundation':
-            sheet_package = 'oracle_fusion_fundamentals_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_fundamentals_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM Core Functional':
-            sheet_package = 'fusion_hcm_core_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_hcm_core_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Talent Management':
-            sheet_package = 'oracle_fusion_talent_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_talent_management_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Benefits':
-            sheet_package = 'oracle_fusion_benefits_training_1'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_benefits_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Payroll':
-            sheet_package = 'fusion_payroll_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_payroll_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion Fast Formula Training':
-            sheet_package = 'oracle_fusion_fastformula'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_fastformula_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Compensation Workbench':
-            sheet_package = 'oracle_fusion_compensation_workbench'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_compensation_workbench_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion HCM Approval Management':
-            sheet_package = 'oracle_fusion_hcm_approval_management'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_hcm_approval_management_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Time & Labour (OTL)':
-            sheet_package = 'oracle_fusion_time_and_labour_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_time_and_labour_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'EBS HCM Experts':
-            sheet_package = 'fusion_hcm_for_ebs_hcm_experts_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_hcm_for_ebs_hcm_experts_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Procurement':
-            sheet_package = 'fusion_procurement_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORDpr0c'
-            fusion_procurement_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM technical Training':
-            sheet_package = 'oracle_fusion_hcm_technical_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_hcm_technical_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Accounting Hub':
-            sheet_package = 'oracle_fusion_financials_accounting_hub_training_1'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_financials_accounting_hub_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Procure to Pay':
-            sheet_package = 'oracle_fusion_procure_to_pay_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_procure_to_pay_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Applications Installation & Patching R9':
-            sheet_package = 'fusion_application_installation_and_patching_R9_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_application_installation_and_patching_R9_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Development In Fusion Applications':
-            sheet_package = 'development_in_fusion_applications'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            development_in_fusion_applications_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Financials':
-            sheet_package = 'oracle_fusion_financials_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_financials_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'oracle_BI_reproting_and_OTBI_training_in_fusion_apps_1':
-        #     sheet_package = 'oracle_BI_reproting_and_OTBI_training_in_fusion_apps_1'
-        #     isFusion = True
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     oracle_BI_reproting_and_OTBI_training_in_fusion_apps_single(isSelfPaced)
-        #     fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-        #                  single_training_password)
-        #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Fusion Account Receivables':
-            sheet_package = 'oracle_fusion_accounts_receivable_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_accounts_receivable_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion e-biz Tax':
-            sheet_package = 'oracle_fusion_financials_cloud_tax_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_financials_cloud_tax_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Apps DBA Training':
-            sheet_package = 'oracle_apps_DBA'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_apps_DBA_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Inventory Order Management & Purchasing':
-            sheet_package = 'oracle_EBS_R12_inventory_order_management_and_purchasing_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_EBS_R12_inventory_order_management_and_purchasing_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Subledger Accounting':
-            sheet_package = 'oracle_R12_subledger_accounting_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_subledger_accounting_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle EBS Financials Functional R12':
-            sheet_package = 'oracle_EBS_R12_functional_financial_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_EBS_R12_functional_financial_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'OAF Training':
-            sheet_package = 'OA_framework_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            OA_framework_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 AGIS Training':
-            sheet_package = 'R12_advanced_global_intercompany_system_AGIS_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            R12_advanced_global_intercompany_system_AGIS_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'ORACLE E-BUSINESS TAX':
-            sheet_package = 'oracle_EBusiness_tax_training_1'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_EBusiness_tax_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Demantra':
-            sheet_package = 'oracle_demantra_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_demantra_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'ORACLE R12 HRMS PAYROLL TRAINING':
-            sheet_package = 'oracle_R12_HRMS_payroll_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_HRMS_payroll_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Implement Configurator':
-            sheet_package = 'oracle_implement_configurator_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_implement_configurator_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 Project Accounting':
-            sheet_package = 'oracle_R12_project_accounting_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_project_accounting_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 - Advanced Supply Chain Planning (ASCP) Fundamentals':
-            sheet_package = 'oracle_R12_advance_supply_chain_planning_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_advance_supply_chain_planning_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 Financials Accounting Hub Fundamentals':
-            sheet_package = 'oracle_R12_financial_accounting_hub_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_financial_accounting_hub_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Business Intelligence Applications Training':
-            sheet_package = 'oracle_business_intelligence_applications_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_business_intelligence_applications_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'oracle_business_intelligence_enterprise_edition_training':
-        #     sheet_package = 'oracle_business_intelligence_enterprise_edition_training'
-        #     isFusion = True
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     oracle_business_intelligence_enterprise_edition_training_single(isSelfPaced)
-        #     fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-        #                  single_training_password)
-        #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Oracle ADF Training':
-            sheet_package = 'oracle_adf_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_adf_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle BPM - Business Process Management Training':
-            sheet_package = 'oracle_business_process_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_business_process_management_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'SOA BPEL Mediator OSB 12c':
-            sheet_package = 'oracle_soa_BPEL_mediator_OBS_development_training_1'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_soa_BPEL_mediator_OBS_development_training_1_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Data Integrator ODI':
-            sheet_package = 'oracle_data_integrator_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_data_integrator_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle MAF':
-            sheet_package = 'oracle_mobile_application_framework_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_mobile_application_framework_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Java, XML and Webservices':
-            sheet_package = 'oracle_java_xml_and_web_service_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_java_xml_and_web_service_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle SQL and PL/SQL Training':
-            sheet_package = 'oracle_sql_and_plSQL_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_sql_and_plSQL_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Financial Integration':
-            sheet_package = 'fusion_financials_integration_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_financials_integration_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Security':
-            sheet_package = 'fusion_financials_security_training_1'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_financials_security_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion Financials Reporting Training':
-            sheet_package = 'fusion_financials_reporting_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_financials_reporting_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Financials Approval':
-            sheet_package = 'fusion_financials_approval_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_financials_approval_management_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Integration Cloud Service':
-            sheet_package = 'oracle_fusion_integration_cloud_Service_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_integration_cloud_Service_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Sales Cloud Extensibility':
-            sheet_package = 'oracle_sales_cloud_extensibility_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_sales_cloud_extensibility_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Account Payables':
-            sheet_package = 'oracle_fusion_account_payable_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_account_payable_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion General Ledger':
-            sheet_package = 'oracle_fusion_general_ledger_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_general_ledger_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'fusion_fixed_asset_training':
-        #     sheet_package = 'fusion_fixed_asset_training'
-        #     isFusion = True
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     fusion_fixed_asset_training_single(isSelfPaced)
-        #     fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-        #                  single_training_password)
-        #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion Project Portfolio Management':
-            sheet_package = 'oracle_fusion_project_portfolio_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_project_portfolio_management_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Ebusiness Suite Fundamentals':
-            sheet_package = 'oracle_business_suit_fundamentals_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_business_suit_fundamentals_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 iProcurement':
-            sheet_package = 'oracle_R12_iprocurement_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_R12_iprocurement_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Service Contract Fundamentals':
-            sheet_package = 'oracle_ebs_R12_service_contract_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_ebs_R12_service_contract_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'oracle_ebs_R12_fixed_assets_training':
-        #     sheet_package = 'oracle_ebs_R12_fixed_assets_training'
-        #     isFusion = False
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     oracle_ebs_R12_fixed_assets_training_single(isSelfPaced)
-        #     ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-        #                  single_training_password)
-        #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Oracle Transportation Management':
-            sheet_package = 'oracle_transportation_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_transportation_management_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Demantra : Predictive Trade Planning':
-            sheet_package = 'oracle_demantra_ptp_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_demantra_ptp_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'IDM Foundation':
-            sheet_package = 'oracle_identity_management_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_identity_management_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Access Manager':
-            sheet_package = 'oracle_access_manager_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_access_manager_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Weblogic Training':
-            sheet_package = 'oracle_weblogic_administrator_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_weblogic_administrator_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Entitlement Server Training':
-            sheet_package = 'oracle_entitlement_server_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_entitlement_server_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion MiddleWare 12c Administration':
-            sheet_package = 'fusion_middleware_12C_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_middleware_12C_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle GoldenGate':
-            sheet_package = 'oracle_goldengate_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_goldengate_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Database 12c: New Features for Administrators Ed2':
-            sheet_package = 'oracle_database_12C_advanced_admininstration_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_database_12C_advanced_admininstration_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Database : Data Guard Administration':
-            sheet_package = 'oracle_data_guard_administration_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_data_guard_administration_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle R12 Approvals Management Engine (AME)':
-            sheet_package = 'r12_approval_management_training_1'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            r12_approval_management_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle ERP Development':
-            sheet_package = 'ebusiness_suit_development_erp_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            ebusiness_suit_development_erp_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'workflow_training':
-        #     sheet_package = 'workflow_training'
-        #     isFusion = False
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     workflow_training_single(isSelfPaced)
-        #     ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-        #                  single_training_password)
-        #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Oracle BI Publisher':
-            sheet_package = 'bi_publisher_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            bi_publisher_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'EBS Techno-Functional Package':
-            sheet_package = 'ebs_techno_functional_training'
-            isFusion = False
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            ebs_techno_functional_training_single(isSelfPaced)
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Fusion HCM Reporting Training':
-            sheet_package = 'fusion_hcm_reporting_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_hcm_reporting_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Integration Training':
-            sheet_package = 'oracle_fusion_hcm_integration_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_fusion_hcm_integration_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM':
-            sheet_package = 'fusion_security_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            fusion_security_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Taleo Training':
-            sheet_package = 'oracle_taleo_recruting_and_onboarding_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_taleo_recruting_and_onboarding_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Taleo Connect Client':
-            sheet_package = 'oracle_taleo_tcc_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_taleo_tcc_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        # if sku == 'oracle_taleo_integration_training':
-        #     sheet_package = 'oracle_taleo_integration_training'
-        #     isFusion = True
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     oracle_taleo_integration_training_single(isSelfPaced)
-        #     fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-        #                  single_training_password)
-        #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        # if sku == 'r1213_administration_training':
-        #     sheet_package = 'r1213_administration_training'
-        #     isFusion = False
-        #     isPackage = False
-            isSelfPaced = None
-        #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
-        #     r1213_administration_training_single(isSelfPaced)
-        #     ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-        #                  single_training_password)
-        #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-        #                         sheet_package, isPackage)
-
-        if sku == 'Siebel open UI':
-            sheet_package = 'Siebel_openUI_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            Siebel_openUI_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Hyperion Financial Management':
-            sheet_package = 'hyperion_financials_management_hfm_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            hyperion_financials_management_hfm_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Hyperion Planning':
-            sheet_package = 'hyperion_planning_training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            hyperion_planning_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Mastering Hyperion Calculation Manager with Essbase and Planning':
-            sheet_package = 'mastering_hyperion_calculation_manager'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            mastering_hyperion_calculation_manager_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-
-        if sku == 'OBIEE Training':
-            sheet_package = 'OBIEE Training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            obiee_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle Workflow Training':
-            sheet_package = 'Oracle Workflow Builder Training'
-            isFusion = True
-            isPackage = False
-            isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
-            oracle_workflow_training_single(isSelfPaced)
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-####################################################################### PACKAGES ###################################################################################
-
-        if sku == 'FUsion HCM Modules PAckage':
-            sheet_package = 'Fusion HCM Modules Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_HCM_Modules_Package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Hyperion Suite Training Package':
-            sheet_package = 'Hyperion Suit Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Hyperion_suit_training_package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM Technical Package':
-            sheet_package = 'HCM Technical Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_HCM_Technical_Package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'EBS R12 Technical training Package':
-            sheet_package = 'Oracle EBS R12 Technical Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            EBS_R12_Technical_Package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Middleware Administration Package':
-            sheet_package = 'Fusion Middleware administration Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_middleware_administration_package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'FUSION APPLICATIONS TRAINING':
-            sheet_package = 'Fusion Applications Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_Application_Training_Package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Apps Training Package':
-            sheet_package = 'Fusion Apps Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_Apps_Training_Package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Cloud Common Technology Package':
-            sheet_package = 'Fusion Cloud Common Technology Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_cloud_common_technology_package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Financials Functional Package':
-            sheet_package = 'Fusion Financials Functional Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_financials_functional_package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Financials Technical Package':
-            sheet_package = 'Fusion Financials Technical Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_financials_technical_package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM and Taleo Functional & Technical Package':
-            sheet_package = 'FUSION HCM AND TALEO FUNCTIONAL & TECHNICAL PACKAGE'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_HCM_and_Taleo_functional_and_technical_package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion HCM trainings':
-            sheet_package = 'Fusion HCM Modules Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_HCM_functional_package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Fusion Middleware Development Package':
-            sheet_package = 'Fusion Middleware Development Training Package'
-            isFusion = True
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Fusion_middleware_development_package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Oracle EBS R12 Functional Package':
-            sheet_package = 'Oracle EBS R12 Functional Package'
-            isFusion = False
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Oracle_EBS_R12_functional_package()
-            ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'R12 + Fusion Apps Training':
-            sheet_package = 'Fusion + R12 Package'
-            isFusion = 'Both'
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            R12_Fusion_Apps_Training()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-        if sku == 'Unlimited Oracle Training Package':
-            sheet_package = 'Unlimited Training Package'
-            isFusion = 'Both'
-            isPackage = True
-            isSelfPaced = None
-            single_training_password = None
-            Unlimited_Oracle_training_Package()
-            fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
-                         single_training_password, isFusion)
-            google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
-                                sheet_package, isPackage)
-
-#############################################################################################################################################################
-
-order_id = input("Enter the Order ID : ")
-response = urllib.request.urlopen(
-    'https://app.ecwid.com/api/v1/5315285/orders?secure_auth_key=e2KMvkdGa1FG&order={number}'.format(number=order_id))
-data = json.loads(response.read())
-
-number = data['orders'][0]['number']
-payment_status = data['orders'][0]['paymentStatus']
-customer_name = data['orders'][0]['customerName']
-customer_email = data['orders'][0]['customerEmail']
-sku = data['orders'][0]['items'][0]['sku']
-value = data['orders'][0]['items'][0]['options'][0]['value']
-
-if payment_status == 'ACCEPTED':
-
-    random_String = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=4))
-    random_password = ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase, k=8))
-    first_name = customer_name.split()[0]
-    customer_username = "sp_{name1}_{name2}".format(name1=first_name, name2=random_String)
-
+        password = driver.find_element_by_xpath('//*[@id="mod-login-password"]')
+        password.send_keys('REDACTED_JOOMLA_PASSWORD')
+        time.sleep(2)
+
+        submit = driver.find_element_by_xpath('//*[@id="form-login"]/fieldset/div[3]/div/div/button')
+        submit.click()
+        time.sleep(2)
+
+        users_click = driver.find_element_by_xpath('/html/body/nav/div/div/div/ul[1]/li[2]/a').click()
+        time.sleep(2)
+
+        manage_click = driver.find_element_by_xpath('/html/body/nav/div/div/div/ul[1]/li[2]/ul/li[1]/a').click()
+        time.sleep(2)
+
+        users_search = driver.find_element_by_xpath('//*[@id="filter_search"]')
+        users_search.send_keys(customer_email)
+        time.sleep(1)
+
+        users_search_click = driver.find_element_by_xpath(
+            '/html/body/div[2]/section/div/div/form/div[2]/div[1]/div[1]/div[1]/div[1]/button').click()
+        time.sleep(2)
+
+        try:
+            isBlocked = driver.find_element_by_xpath('//*[@id="userList"]/tbody/tr/td[4]/a').get_attribute(
+                "data-original-title")
+            if isBlocked == 'Unblock':
+                unblock = driver.find_element_by_xpath('//*[@id="userList"]/tbody/tr/td[4]/a/span').click()
+            time.sleep(2)
+
+            found_user = driver.find_element_by_xpath(
+                '/html/body/div[2]/section/div/div/form/div[2]/table/tbody/tr/td[2]/div[1]/a')
+            found_user.click()
+            time.sleep(2)
+
+            login_name = driver.find_element_by_xpath('//*[@id="jform_username"]').get_attribute('value')
+            time.sleep(2)
+
+            existing_customer_username = driver.find_element_by_xpath('//*[@id="jform_username"]').get_attribute(
+                'value')
+
+            assigned_users_groups = driver.find_element_by_xpath(
+                '/html/body/div[2]/section/div/div/form/fieldset/ul/li[2]/a').click()
+            time.sleep(2)
+            ######################################################### SINGLE TRAININGS ##################################################
+            if sku == 'Fusion Apps Foundation':
+                sheet_package = 'oracle_fusion_fundamentals_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_fundamentals_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM Core Functional':
+                sheet_package = 'fusion_hcm_core_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_hcm_core_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Talent Management':
+                sheet_package = 'oracle_fusion_talent_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_talent_management_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Benefits':
+                sheet_package = 'oracle_fusion_benefits_training_1'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_benefits_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Payroll':
+                sheet_package = 'fusion_payroll_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                block_training(customer_email)
+                # fusion_payroll_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion Fast Formula Training':
+                sheet_package = 'oracle_fusion_fastformula'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_fastformula_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Compensation Workbench':
+                sheet_package = 'oracle_fusion_compensation_workbench'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_compensation_workbench_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion HCM Approval Management':
+                sheet_package = 'oracle_fusion_hcm_approval_management'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_hcm_approval_management_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Time & Labour (OTL)':
+                sheet_package = 'oracle_fusion_time_and_labour_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_time_and_labour_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'EBS HCM Experts':
+                sheet_package = 'fusion_hcm_for_ebs_hcm_experts_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_hcm_for_ebs_hcm_experts_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Procurement':
+                sheet_package = 'fusion_procurement_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORDpr0c'
+                fusion_procurement_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM technical Training':
+                sheet_package = 'oracle_fusion_hcm_technical_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_hcm_technical_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Accounting Hub':
+                sheet_package = 'oracle_fusion_financials_accounting_hub_training_1'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_financials_accounting_hub_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Procure to Pay':
+                sheet_package = 'oracle_fusion_procure_to_pay_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_procure_to_pay_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Applications Installation & Patching R9':
+                sheet_package = 'fusion_application_installation_and_patching_R9_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_application_installation_and_patching_R9_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Development In Fusion Applications':
+                sheet_package = 'development_in_fusion_applications'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                development_in_fusion_applications_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Financials':
+                sheet_package = 'oracle_fusion_financials_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_financials_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'Oracle Fusion HCM Reporting Training':
+                #     sheet_package = 'oracle_BI_reproting_and_OTBI_training_in_fusion_apps_1'
+                #     isFusion = True
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     oracle_BI_reproting_and_OTBI_training_in_fusion_apps_single(isSelfPaced)
+            #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+            #                        single_training_password)
+            #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Fusion Account Receivables':
+                sheet_package = 'oracle_fusion_accounts_receivable_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_accounts_receivable_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion e-biz Tax':
+                sheet_package = 'oracle_fusion_financials_cloud_tax_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_financials_cloud_tax_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Apps DBA Training':
+                sheet_package = 'oracle_apps_DBA'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_apps_DBA_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Inventory Order Management & Purchasing':
+                sheet_package = 'oracle_EBS_R12_inventory_order_management_and_purchasing_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_EBS_R12_inventory_order_management_and_purchasing_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Subledger Accounting':
+                sheet_package = 'oracle_R12_subledger_accounting_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_subledger_accounting_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle EBS Financials Functional R12':
+                sheet_package = 'oracle_EBS_R12_functional_financial_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_EBS_R12_functional_financial_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'OAF Training':
+                sheet_package = 'OA_framework_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                OA_framework_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 AGIS Training':
+                sheet_package = 'R12_advanced_global_intercompany_system_AGIS_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                R12_advanced_global_intercompany_system_AGIS_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'ORACLE E-BUSINESS TAX':
+                sheet_package = 'oracle_EBusiness_tax_training_1'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_EBusiness_tax_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Demantra':
+                sheet_package = 'oracle_demantra_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_demantra_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'ORACLE R12 HRMS PAYROLL TRAINING':
+                sheet_package = 'oracle_R12_HRMS_payroll_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_HRMS_payroll_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Implement Configurator':
+                sheet_package = 'oracle_implement_configurator_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_implement_configurator_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 Project Accounting':
+                sheet_package = 'oracle_R12_project_accounting_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_project_accounting_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 - Advanced Supply Chain Planning (ASCP) Fundamentals':
+                sheet_package = 'oracle_R12_advance_supply_chain_planning_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_advance_supply_chain_planning_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 Financials Accounting Hub Fundamentals':
+                sheet_package = 'oracle_R12_financial_accounting_hub_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_financial_accounting_hub_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Business Intelligence Applications Training':
+                sheet_package = 'oracle_business_intelligence_applications_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_business_intelligence_applications_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'oracle_business_intelligence_enterprise_edition_training':
+                #     sheet_package = 'oracle_business_intelligence_enterprise_edition_training'
+                #     isFusion = True
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     oracle_business_intelligence_enterprise_edition_training_single(isSelfPaced)
+            #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+            #                        single_training_password)
+            #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Oracle ADF Training':
+                sheet_package = 'oracle_adf_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_adf_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle BPM - Business Process Management Training':
+                sheet_package = 'oracle_business_process_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_business_process_management_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'SOA BPEL Mediator OSB 12c':
+                sheet_package = 'oracle_soa_BPEL_mediator_OBS_development_training_1'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_soa_BPEL_mediator_OBS_development_training_1_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Data Integrator ODI':
+                sheet_package = 'oracle_data_integrator_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_data_integrator_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle MAF':
+                sheet_package = 'oracle_mobile_application_framework_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_mobile_application_framework_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Java, XML and Webservices':
+                sheet_package = 'oracle_java_xml_and_web_service_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_java_xml_and_web_service_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle SQL and PL/SQL Training':
+                sheet_package = 'oracle_sql_and_plSQL_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_sql_and_plSQL_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Financial Integration':
+                sheet_package = 'fusion_financials_integration_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_financials_integration_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Security':
+                sheet_package = 'fusion_financials_security_training_1'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_financials_security_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion Financials Reporting Training':
+                sheet_package = 'fusion_financials_reporting_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_financials_reporting_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Financials Approval':
+                sheet_package = 'fusion_financials_approval_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_financials_approval_management_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Integration Cloud Service':
+                sheet_package = 'oracle_fusion_integration_cloud_Service_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_integration_cloud_Service_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Sales Cloud Extensibility':
+                sheet_package = 'oracle_sales_cloud_extensibility_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_sales_cloud_extensibility_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Account Payables':
+                sheet_package = 'oracle_fusion_account_payable_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_account_payable_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion General Ledger':
+                sheet_package = 'oracle_fusion_general_ledger_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_general_ledger_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'fusion_fixed_asset_training':
+                #     sheet_package = 'fusion_fixed_asset_training'
+                #     isFusion = True
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     fusion_fixed_asset_training_single(isSelfPaced)
+            #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+            #                        single_training_password)
+            #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion Project Portfolio Management':
+                sheet_package = 'oracle_fusion_project_portfolio_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_project_portfolio_management_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Ebusiness Suite Fundamentals':
+                sheet_package = 'oracle_business_suit_fundamentals_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_business_suit_fundamentals_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 iProcurement':
+                sheet_package = 'oracle_R12_iprocurement_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_iprocurement_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Service Contract Fundamentals':
+                sheet_package = 'oracle_ebs_R12_service_contract_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_ebs_R12_service_contract_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'oracle_ebs_R12_fixed_assets_training':
+                #     sheet_package = 'oracle_ebs_R12_fixed_assets_training'
+                #     isFusion = False
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     oracle_ebs_R12_fixed_assets_training_single(isSelfPaced)
+            #     ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+            #                        single_training_password)
+            #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Oracle Transportation Management':
+                sheet_package = 'oracle_transportation_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_transportation_management_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Demantra : Predictive Trade Planning':
+                sheet_package = 'oracle_demantra_ptp_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_demantra_ptp_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'IDM Foundation':
+                sheet_package = 'oracle_identity_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_identity_management_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Access Manager':
+                sheet_package = 'oracle_access_manager_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_access_manager_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Weblogic Training':
+                sheet_package = 'oracle_weblogic_administrator_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_weblogic_administrator_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Entitlement Server Training':
+                sheet_package = 'oracle_entitlement_server_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_entitlement_server_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion MiddleWare 12c Administration':
+                sheet_package = 'fusion_middleware_12C_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_middleware_12C_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle GoldenGate':
+                sheet_package = 'oracle_goldengate_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_goldengate_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Database 12c: New Features for Administrators Ed2':
+                sheet_package = 'oracle_database_12C_advanced_admininstration_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_database_12C_advanced_admininstration_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Database : Data Guard Administration':
+                sheet_package = 'oracle_data_guard_administration_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_data_guard_administration_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 Approvals Management Engine (AME)':
+                sheet_package = 'r12_approval_management_training_1'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                r12_approval_management_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle ERP Development':
+                sheet_package = 'ebusiness_suit_development_erp_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                ebusiness_suit_development_erp_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'Oracle Workflow Training':
+                #     sheet_package = 'workflow_training'
+                #     isFusion = False
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     workflow_training_single(isSelfPaced)
+            #     ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+            #                        single_training_password)
+            #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Oracle BI Publisher':
+                sheet_package = 'bi_publisher_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                bi_publisher_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'EBS Techno-Functional Package':
+                sheet_package = 'ebs_techno_functional_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                ebs_techno_functional_training_single(isSelfPaced)
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion HCM Reporting Training':
+                sheet_package = 'fusion_hcm_reporting_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_hcm_reporting_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Integration Training':
+                sheet_package = 'oracle_fusion_hcm_integration_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_hcm_integration_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM':
+                sheet_package = 'fusion_security_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_security_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Taleo Training':
+                sheet_package = 'oracle_taleo_recruting_and_onboarding_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_taleo_recruting_and_onboarding_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Taleo Connect Client':
+                sheet_package = 'oracle_taleo_tcc_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_taleo_tcc_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'oracle_taleo_integration_training':
+                #     sheet_package = 'oracle_taleo_integration_training'
+                #     isFusion = True
+                #     isPackage = False
+                isSelfPaced = None
+                #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                #     oracle_taleo_integration_training_single(isSelfPaced)
+                #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                #                        single_training_password)
+                #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                #                         sheet_package, isPackage)
+
+                # if sku == 'r1213_administration_training':
+                #     sheet_package = 'r1213_administration_training'
+                #     isFusion = False
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     r1213_administration_training_single(isSelfPaced)
+            #     fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+            #                        single_training_password)
+            #     google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Siebel open UI':
+                sheet_package = 'Siebel_openUI_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                Siebel_openUI_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Hyperion Financial Management':
+                sheet_package = 'hyperion_financials_management_hfm_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                hyperion_financials_management_hfm_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Hyperion Planning':
+                sheet_package = 'hyperion_planning_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                hyperion_planning_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Mastering Hyperion Calculation Manager with Essbase and Planning':
+                sheet_package = 'mastering_hyperion_calculation_manager'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                mastering_hyperion_calculation_manager_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'OBIEE Training':
+                sheet_package = 'OBIEE Training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                obiee_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Workflow Training':
+                sheet_package = 'Oracle Workflow Builder Training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_workflow_training_single(isSelfPaced)
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            ############################################### PACKAGES ###########################################################
+
+            if sku == 'Fusion Middleware Administration Package':
+                sheet_package = 'Fusion Middleware administration Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_middleware_administration_package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Hyperion Suite Training Package':
+                sheet_package = 'Hyperion Suit Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Hyperion_suit_training_package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM Technical Package':
+                sheet_package = 'HCM Technical Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_HCM_Technical_Package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'EBS R12 Technical training Package':
+                sheet_package = 'Oracle EBS R12 Technical Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                EBS_R12_Technical_Package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'FUsion HCM Modules PAckage':
+                sheet_package = 'Fusion HCM Modules Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_HCM_Modules_Package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'FUSION APPLICATIONS TRAINING':
+                sheet_package = 'Fusion Applications Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_Application_Training_Package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Cloud Common Technology Package':
+                sheet_package = 'Fusion Cloud Common Technology Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_cloud_common_technology_package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Financials Functional Package':
+                sheet_package = 'Fusion Financials Functional Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_financials_functional_package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Financials Technical Package':
+                sheet_package = 'Fusion Financials Technical Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_financials_technical_package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM and Taleo Functional & Technical Package':
+                sheet_package = 'FUSION HCM AND TALEO FUNCTIONAL & TECHNICAL PACKAGE'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_HCM_and_Taleo_functional_and_technical_package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM trainings':
+                sheet_package = 'Fusion HCM Modules Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_HCM_functional_package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Middleware Development Package':  # fusion access not given
+                sheet_package = 'Fusion Middleware Development Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_middleware_development_package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle EBS R12 Functional Package':
+                sheet_package = 'Oracle EBS R12 Functional Package'
+                isFusion = False
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Oracle_EBS_R12_functional_package()
+                ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                single_training_password)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'R12 + Fusion Apps Training':  # Fusion+EBS
+                sheet_package = 'Fusion + R12 Package'
+                isFusion = 'Both'
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                R12_Fusion_Apps_Training()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Unlimited Oracle Training Package':  # Fusion+EBS
+                sheet_package = 'Unlimited Training Package'
+                isFusion = 'Both'
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Unlimited_Oracle_training_Package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Apps Training Package':
+                sheet_package = 'Fusion Apps Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_Apps_Training_Package()
+                fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
+                                   single_training_password, isFusion)
+                google_sheet_update(customer_name, existing_customer_username, None, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+
+        except:
+
+            new_user = driver.find_element_by_xpath('//*[@id="toolbar-new"]/button').click()
+            time.sleep(2)
+
+            new_customer_name = driver.find_element_by_xpath('//*[@id="jform_name"]').send_keys(customer_name)
+            new_customer_username = driver.find_element_by_xpath('//*[@id="jform_username"]').send_keys(
+                customer_username)
+            new_customer_password = driver.find_element_by_xpath('//*[@id="jform_password"]').send_keys(random_password)
+            conform_new_password = driver.find_element_by_xpath('//*[@id="jform_password2"]').send_keys(random_password)
+            new_customer_email = driver.find_element_by_xpath('//*[@id="jform_email"]').send_keys(customer_email)
+
+            ##############################################################  SINGLE TRAININGS #############################################################################
+
+            if sku == 'Fusion Apps Foundation':
+                sheet_package = 'oracle_fusion_fundamentals_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_fundamentals_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM Core Functional':
+                sheet_package = 'fusion_hcm_core_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_hcm_core_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Talent Management':
+                sheet_package = 'oracle_fusion_talent_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_talent_management_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Benefits':
+                sheet_package = 'oracle_fusion_benefits_training_1'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_benefits_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Payroll':
+                sheet_package = 'fusion_payroll_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_payroll_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion Fast Formula Training':
+                sheet_package = 'oracle_fusion_fastformula'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_fastformula_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Compensation Workbench':
+                sheet_package = 'oracle_fusion_compensation_workbench'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_compensation_workbench_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion HCM Approval Management':
+                sheet_package = 'oracle_fusion_hcm_approval_management'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_hcm_approval_management_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Time & Labour (OTL)':
+                sheet_package = 'oracle_fusion_time_and_labour_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_time_and_labour_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'EBS HCM Experts':
+                sheet_package = 'fusion_hcm_for_ebs_hcm_experts_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_hcm_for_ebs_hcm_experts_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Procurement':
+                sheet_package = 'fusion_procurement_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORDpr0c'
+                fusion_procurement_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM technical Training':
+                sheet_package = 'oracle_fusion_hcm_technical_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_hcm_technical_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Accounting Hub':
+                sheet_package = 'oracle_fusion_financials_accounting_hub_training_1'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_financials_accounting_hub_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Procure to Pay':
+                sheet_package = 'oracle_fusion_procure_to_pay_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_procure_to_pay_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Applications Installation & Patching R9':
+                sheet_package = 'fusion_application_installation_and_patching_R9_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_application_installation_and_patching_R9_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Development In Fusion Applications':
+                sheet_package = 'development_in_fusion_applications'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                development_in_fusion_applications_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Financials':
+                sheet_package = 'oracle_fusion_financials_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_financials_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'oracle_BI_reproting_and_OTBI_training_in_fusion_apps_1':
+                #     sheet_package = 'oracle_BI_reproting_and_OTBI_training_in_fusion_apps_1'
+                #     isFusion = True
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     oracle_BI_reproting_and_OTBI_training_in_fusion_apps_single(isSelfPaced)
+            #     fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+            #                  single_training_password)
+            #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Fusion Account Receivables':
+                sheet_package = 'oracle_fusion_accounts_receivable_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_accounts_receivable_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion e-biz Tax':
+                sheet_package = 'oracle_fusion_financials_cloud_tax_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_financials_cloud_tax_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Apps DBA Training':
+                sheet_package = 'oracle_apps_DBA'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_apps_DBA_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Inventory Order Management & Purchasing':
+                sheet_package = 'oracle_EBS_R12_inventory_order_management_and_purchasing_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_EBS_R12_inventory_order_management_and_purchasing_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Subledger Accounting':
+                sheet_package = 'oracle_R12_subledger_accounting_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_subledger_accounting_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle EBS Financials Functional R12':
+                sheet_package = 'oracle_EBS_R12_functional_financial_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_EBS_R12_functional_financial_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'OAF Training':
+                sheet_package = 'OA_framework_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                OA_framework_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 AGIS Training':
+                sheet_package = 'R12_advanced_global_intercompany_system_AGIS_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                R12_advanced_global_intercompany_system_AGIS_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'ORACLE E-BUSINESS TAX':
+                sheet_package = 'oracle_EBusiness_tax_training_1'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_EBusiness_tax_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Demantra':
+                sheet_package = 'oracle_demantra_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_demantra_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'ORACLE R12 HRMS PAYROLL TRAINING':
+                sheet_package = 'oracle_R12_HRMS_payroll_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_HRMS_payroll_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Implement Configurator':
+                sheet_package = 'oracle_implement_configurator_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_implement_configurator_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 Project Accounting':
+                sheet_package = 'oracle_R12_project_accounting_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_project_accounting_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 - Advanced Supply Chain Planning (ASCP) Fundamentals':
+                sheet_package = 'oracle_R12_advance_supply_chain_planning_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_advance_supply_chain_planning_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 Financials Accounting Hub Fundamentals':
+                sheet_package = 'oracle_R12_financial_accounting_hub_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_financial_accounting_hub_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Business Intelligence Applications Training':
+                sheet_package = 'oracle_business_intelligence_applications_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_business_intelligence_applications_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'oracle_business_intelligence_enterprise_edition_training':
+                #     sheet_package = 'oracle_business_intelligence_enterprise_edition_training'
+                #     isFusion = True
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     oracle_business_intelligence_enterprise_edition_training_single(isSelfPaced)
+            #     fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+            #                  single_training_password)
+            #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Oracle ADF Training':
+                sheet_package = 'oracle_adf_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_adf_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle BPM - Business Process Management Training':
+                sheet_package = 'oracle_business_process_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_business_process_management_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'SOA BPEL Mediator OSB 12c':
+                sheet_package = 'oracle_soa_BPEL_mediator_OBS_development_training_1'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_soa_BPEL_mediator_OBS_development_training_1_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Data Integrator ODI':
+                sheet_package = 'oracle_data_integrator_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_data_integrator_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle MAF':
+                sheet_package = 'oracle_mobile_application_framework_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_mobile_application_framework_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Java, XML and Webservices':
+                sheet_package = 'oracle_java_xml_and_web_service_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_java_xml_and_web_service_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle SQL and PL/SQL Training':
+                sheet_package = 'oracle_sql_and_plSQL_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_sql_and_plSQL_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Financial Integration':
+                sheet_package = 'fusion_financials_integration_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_financials_integration_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Security':
+                sheet_package = 'fusion_financials_security_training_1'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_financials_security_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion Financials Reporting Training':
+                sheet_package = 'fusion_financials_reporting_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_financials_reporting_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Financials Approval':
+                sheet_package = 'fusion_financials_approval_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_financials_approval_management_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Integration Cloud Service':
+                sheet_package = 'oracle_fusion_integration_cloud_Service_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_integration_cloud_Service_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Sales Cloud Extensibility':
+                sheet_package = 'oracle_sales_cloud_extensibility_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_sales_cloud_extensibility_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Account Payables':
+                sheet_package = 'oracle_fusion_account_payable_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_account_payable_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion General Ledger':
+                sheet_package = 'oracle_fusion_general_ledger_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_general_ledger_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'fusion_fixed_asset_training':
+                #     sheet_package = 'fusion_fixed_asset_training'
+                #     isFusion = True
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     fusion_fixed_asset_training_single(isSelfPaced)
+            #     fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+            #                  single_training_password)
+            #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion Project Portfolio Management':
+                sheet_package = 'oracle_fusion_project_portfolio_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_project_portfolio_management_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Ebusiness Suite Fundamentals':
+                sheet_package = 'oracle_business_suit_fundamentals_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_business_suit_fundamentals_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 iProcurement':
+                sheet_package = 'oracle_R12_iprocurement_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_R12_iprocurement_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Service Contract Fundamentals':
+                sheet_package = 'oracle_ebs_R12_service_contract_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_ebs_R12_service_contract_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'oracle_ebs_R12_fixed_assets_training':
+                #     sheet_package = 'oracle_ebs_R12_fixed_assets_training'
+                #     isFusion = False
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     oracle_ebs_R12_fixed_assets_training_single(isSelfPaced)
+            #     ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+            #                  single_training_password)
+            #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Oracle Transportation Management':
+                sheet_package = 'oracle_transportation_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_transportation_management_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Demantra : Predictive Trade Planning':
+                sheet_package = 'oracle_demantra_ptp_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_demantra_ptp_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'IDM Foundation':
+                sheet_package = 'oracle_identity_management_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_identity_management_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Access Manager':
+                sheet_package = 'oracle_access_manager_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_access_manager_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Weblogic Training':
+                sheet_package = 'oracle_weblogic_administrator_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_weblogic_administrator_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Entitlement Server Training':
+                sheet_package = 'oracle_entitlement_server_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_entitlement_server_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion MiddleWare 12c Administration':
+                sheet_package = 'fusion_middleware_12C_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_middleware_12C_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle GoldenGate':
+                sheet_package = 'oracle_goldengate_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_goldengate_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Database 12c: New Features for Administrators Ed2':
+                sheet_package = 'oracle_database_12C_advanced_admininstration_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_database_12C_advanced_admininstration_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Database : Data Guard Administration':
+                sheet_package = 'oracle_data_guard_administration_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_data_guard_administration_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle R12 Approvals Management Engine (AME)':
+                sheet_package = 'r12_approval_management_training_1'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                r12_approval_management_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle ERP Development':
+                sheet_package = 'ebusiness_suit_development_erp_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                ebusiness_suit_development_erp_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'workflow_training':
+                #     sheet_package = 'workflow_training'
+                #     isFusion = False
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     workflow_training_single(isSelfPaced)
+            #     ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+            #                  single_training_password)
+            #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Oracle BI Publisher':
+                sheet_package = 'bi_publisher_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                bi_publisher_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'EBS Techno-Functional Package':
+                sheet_package = 'ebs_techno_functional_training'
+                isFusion = False
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                ebs_techno_functional_training_single(isSelfPaced)
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Fusion HCM Reporting Training':
+                sheet_package = 'fusion_hcm_reporting_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_hcm_reporting_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Integration Training':
+                sheet_package = 'oracle_fusion_hcm_integration_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_fusion_hcm_integration_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM':
+                sheet_package = 'fusion_security_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                fusion_security_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Taleo Training':
+                sheet_package = 'oracle_taleo_recruting_and_onboarding_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_taleo_recruting_and_onboarding_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Taleo Connect Client':
+                sheet_package = 'oracle_taleo_tcc_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_taleo_tcc_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+                # if sku == 'oracle_taleo_integration_training':
+                #     sheet_package = 'oracle_taleo_integration_training'
+                #     isFusion = True
+                #     isPackage = False
+                isSelfPaced = None
+                #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                #     oracle_taleo_integration_training_single(isSelfPaced)
+                #     fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                #                  single_training_password)
+                #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                #                         sheet_package, isPackage)
+
+                # if sku == 'r1213_administration_training':
+                #     sheet_package = 'r1213_administration_training'
+                #     isFusion = False
+                #     isPackage = False
+                isSelfPaced = None
+            #     single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            #     r1213_administration_training_single(isSelfPaced)
+            #     ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+            #                  single_training_password)
+            #     google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+            #                         sheet_package, isPackage)
+
+            if sku == 'Siebel open UI':
+                sheet_package = 'Siebel_openUI_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                Siebel_openUI_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Hyperion Financial Management':
+                sheet_package = 'hyperion_financials_management_hfm_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                hyperion_financials_management_hfm_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Hyperion Planning':
+                sheet_package = 'hyperion_planning_training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                hyperion_planning_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Mastering Hyperion Calculation Manager with Essbase and Planning':
+                sheet_package = 'mastering_hyperion_calculation_manager'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                mastering_hyperion_calculation_manager_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'OBIEE Training':
+                sheet_package = 'OBIEE Training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                obiee_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle Workflow Training':
+                sheet_package = 'Oracle Workflow Builder Training'
+                isFusion = True
+                isPackage = False
+                isSelfPaced = None
+                single_training_password = 'REDACTED_TRAINING_PASSWORD'
+                oracle_workflow_training_single(isSelfPaced)
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            ####################################################################### PACKAGES ###################################################################################
+
+            if sku == 'FUsion HCM Modules PAckage':
+                sheet_package = 'Fusion HCM Modules Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_HCM_Modules_Package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Hyperion Suite Training Package':
+                sheet_package = 'Hyperion Suit Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Hyperion_suit_training_package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM Technical Package':
+                sheet_package = 'HCM Technical Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_HCM_Technical_Package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'EBS R12 Technical training Package':
+                sheet_package = 'Oracle EBS R12 Technical Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                EBS_R12_Technical_Package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Middleware Administration Package':
+                sheet_package = 'Fusion Middleware administration Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_middleware_administration_package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'FUSION APPLICATIONS TRAINING':
+                sheet_package = 'Fusion Applications Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_Application_Training_Package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Apps Training Package':
+                sheet_package = 'Fusion Apps Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_Apps_Training_Package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Cloud Common Technology Package':
+                sheet_package = 'Fusion Cloud Common Technology Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_cloud_common_technology_package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Financials Functional Package':
+                sheet_package = 'Fusion Financials Functional Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_financials_functional_package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Financials Technical Package':
+                sheet_package = 'Fusion Financials Technical Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_financials_technical_package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM and Taleo Functional & Technical Package':
+                sheet_package = 'FUSION HCM AND TALEO FUNCTIONAL & TECHNICAL PACKAGE'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_HCM_and_Taleo_functional_and_technical_package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion HCM trainings':
+                sheet_package = 'Fusion HCM Modules Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_HCM_functional_package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Fusion Middleware Development Package':
+                sheet_package = 'Fusion Middleware Development Training Package'
+                isFusion = True
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Fusion_middleware_development_package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Oracle EBS R12 Functional Package':
+                sheet_package = 'Oracle EBS R12 Functional Package'
+                isFusion = False
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Oracle_EBS_R12_functional_package()
+                ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                          single_training_password)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'R12 + Fusion Apps Training':
+                sheet_package = 'Fusion + R12 Package'
+                isFusion = 'Both'
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                R12_Fusion_Apps_Training()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+            if sku == 'Unlimited Oracle Training Package':
+                sheet_package = 'Unlimited Training Package'
+                isFusion = 'Both'
+                isPackage = True
+                isSelfPaced = None
+                single_training_password = None
+                Unlimited_Oracle_training_Package()
+                fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
+                             single_training_password, isFusion)
+                google_sheet_update(customer_name, customer_username, random_password, isFusion, customer_email,
+                                    sheet_package, isPackage)
+
+    #############################################################################################################################################################
+
+    else:
+        print ("Payment Status NOT Accepted")
+
+    return "Succeess"
+
+
+if __name__ == "__main__":
     options = webdriver.ChromeOptions()
     options.add_argument('--disable-extentions')
     options.add_argument('--enable-popup-blocking')
@@ -6988,12 +6996,8 @@ if payment_status == 'ACCEPTED':
     options.add_argument('--disable-gpu')
     options.add_argument("--log-level=3")
     options.add_argument("--start-maximized")
-    options.add_argument('--headless')
+    # options.add_argument('--headless')
 
-
-    driver = webdriver.Chrome(executable_path='/mnt/d/Users/hp/Python/Scripts/chromedriver.exe',
+    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',
                               chrome_options=options)
-    joomla(customer_email)
-
-else:
-    print ("Payment Status NOT Accepted")
+    app.run(debug=True)
