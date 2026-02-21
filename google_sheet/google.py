@@ -1,3 +1,4 @@
+import os
 import gspread
 import pandas as pd
 from datetime import datetime, timedelta
@@ -7,7 +8,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 def google_sheet_update(customer_name, customer_username, customer_password, isFusion, customer_email, customer_training, isPackage):
 
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name('REDACTED_SERVICE_ACCOUNT_FILE.json',
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON'),
                                                                    scope)
     gc = gspread.authorize(credentials)
     wks = gc.open('Retail Customers - Self Paced ').worksheet('SP 2018')

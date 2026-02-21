@@ -1,3 +1,4 @@
+import os
 import json
 import time
 import string
@@ -11,6 +12,15 @@ from mails.fusion_mail import fusion_email
 from mails.ebs_mail_existing import ebs_email_exist
 from google_sheet.google import google_sheet_update
 from mails.fusion_mail_existing import fusion_email_exist
+
+
+# Load training passwords from config file (do not hardcode passwords)
+_training_passwords_file = os.environ.get('TRAINING_PASSWORDS_FILE', 'training_passwords.json')
+try:
+    with open(_training_passwords_file, 'r') as _f:
+        TRAINING_PASSWORDS = json.load(_f)
+except (FileNotFoundError, json.JSONDecodeError):
+    TRAINING_PASSWORDS = {}
 from oauth2client.service_account import ServiceAccountCredentials
 
 
@@ -18,7 +28,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 def existing_users_block(email_address):
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name('REDACTED_SERVICE_ACCOUNT_FILE.json',
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON'),
                                                                    scope)
     gc = gspread.authorize(credentials)
     wks_2 = gc.open('Retail Customers - Self Paced ').worksheet('SP 2018')
@@ -4726,14 +4736,14 @@ def Unlimited_Oracle_training_Package():
 
 
 def joomla(customer_email):
-    driver.get('http://www.REDACTED_DOMAIN/administrator')
+    driver.get(os.environ.get('JOOMLA_ADMIN_URL'))
 
     email = driver.find_element_by_xpath('//*[@id="mod-login-username"]')
-    email.send_keys('REDACTED_USERNAME')
+    email.send_keys(os.environ.get('JOOMLA_ADMIN_USERNAME'))
     time.sleep(2)
 
     password = driver.find_element_by_xpath('//*[@id="mod-login-password"]')
-    password.send_keys('REDACTED_JOOMLA_PASSWORD')
+    password.send_keys(os.environ.get('JOOMLA_ADMIN_PASSWORD'))
     time.sleep(2)
 
     submit = driver.find_element_by_xpath('//*[@id="form-login"]/fieldset/div[3]/div/div/button')
@@ -4741,11 +4751,11 @@ def joomla(customer_email):
     time.sleep(2)
 
     email = driver.find_element_by_xpath('//*[@id="mod-login-username"]')
-    email.send_keys('REDACTED_USERNAME')
+    email.send_keys(os.environ.get('JOOMLA_ADMIN_USERNAME'))
     time.sleep(2)
 
     password = driver.find_element_by_xpath('//*[@id="mod-login-password"]')
-    password.send_keys('REDACTED_JOOMLA_PASSWORD')
+    password.send_keys(os.environ.get('JOOMLA_ADMIN_PASSWORD'))
     time.sleep(2)
 
     submit = driver.find_element_by_xpath('//*[@id="form-login"]/fieldset/div[3]/div/div/button')
@@ -4793,7 +4803,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_fundamentals_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4805,7 +4815,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_hcm_core_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4817,7 +4827,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_talent_management_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4829,7 +4839,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_benefits_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4841,7 +4851,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_payroll_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4853,7 +4863,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_fastformula_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4865,7 +4875,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_compensation_workbench_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4877,7 +4887,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_hcm_approval_management_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4889,7 +4899,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_time_and_labour_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4901,7 +4911,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_hcm_for_ebs_hcm_experts_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4913,7 +4923,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORDpr0c'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_procurement_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4925,7 +4935,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_hcm_technical_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4937,7 +4947,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_financials_accounting_hub_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4949,7 +4959,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_procure_to_pay_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4961,7 +4971,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_application_installation_and_patching_R9_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4973,7 +4983,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             development_in_fusion_applications_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -4985,7 +4995,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_financials_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5009,7 +5019,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_accounts_receivable_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5021,7 +5031,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_financials_cloud_tax_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5033,7 +5043,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_apps_DBA_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5045,7 +5055,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_EBS_R12_inventory_order_management_and_purchasing_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5057,7 +5067,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_subledger_accounting_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5069,7 +5079,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_EBS_R12_functional_financial_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5081,7 +5091,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             OA_framework_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5093,7 +5103,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             R12_advanced_global_intercompany_system_AGIS_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5105,7 +5115,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_EBusiness_tax_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5117,7 +5127,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_demantra_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5129,7 +5139,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_HRMS_payroll_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5141,7 +5151,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_implement_configurator_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5153,7 +5163,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_project_accounting_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5165,7 +5175,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_advance_supply_chain_planning_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5177,7 +5187,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_financial_accounting_hub_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5189,7 +5199,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_business_intelligence_applications_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5213,7 +5223,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_adf_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5225,7 +5235,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_business_process_management_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5237,7 +5247,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_soa_BPEL_mediator_OBS_development_training_1_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5249,7 +5259,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_data_integrator_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5261,7 +5271,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_mobile_application_framework_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5273,7 +5283,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_java_xml_and_web_service_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5285,7 +5295,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_sql_and_plSQL_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5297,7 +5307,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_financials_integration_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5309,7 +5319,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_financials_security_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5321,7 +5331,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_financials_reporting_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5333,7 +5343,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_financials_approval_management_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5345,7 +5355,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_integration_cloud_Service_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5357,7 +5367,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_sales_cloud_extensibility_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5369,7 +5379,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_account_payable_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5381,7 +5391,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_general_ledger_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5405,7 +5415,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_project_portfolio_management_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5417,7 +5427,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_business_suit_fundamentals_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5429,7 +5439,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_iprocurement_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5441,7 +5451,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_ebs_R12_service_contract_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5465,7 +5475,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_transportation_management_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5477,7 +5487,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_demantra_ptp_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5489,7 +5499,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_identity_management_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5501,7 +5511,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_access_manager_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5513,7 +5523,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_weblogic_administrator_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5525,7 +5535,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_entitlement_server_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5537,7 +5547,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_middleware_12C_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5549,7 +5559,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_goldengate_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5561,7 +5571,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_database_12C_advanced_admininstration_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5573,7 +5583,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_data_guard_administration_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5585,7 +5595,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             r12_approval_management_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5597,7 +5607,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             ebusiness_suit_development_erp_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5621,7 +5631,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             bi_publisher_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5633,7 +5643,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             ebs_techno_functional_training_single(isSelfPaced)
             ebs_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password)
@@ -5645,7 +5655,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_hcm_reporting_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5657,7 +5667,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_hcm_integration_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5669,7 +5679,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_security_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5681,7 +5691,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_taleo_recruting_and_onboarding_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5693,7 +5703,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_taleo_tcc_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5729,7 +5739,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             Siebel_openUI_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5741,7 +5751,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             hyperion_financials_management_hfm_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5753,7 +5763,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             hyperion_planning_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5765,7 +5775,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             mastering_hyperion_calculation_manager_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5779,7 +5789,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             obiee_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -5792,7 +5802,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_workflow_training_single(isSelfPaced)
             fusion_email_exist(customer_name, existing_customer_username, customer_email, sku, isPackage,
                                single_training_password, isFusion)
@@ -6015,7 +6025,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_fundamentals_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6027,7 +6037,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_hcm_core_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6039,7 +6049,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_talent_management_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6051,7 +6061,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_benefits_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6063,7 +6073,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_payroll_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6075,7 +6085,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_fastformula_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6087,7 +6097,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_compensation_workbench_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6099,7 +6109,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_hcm_approval_management_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6111,7 +6121,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_time_and_labour_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6123,7 +6133,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_hcm_for_ebs_hcm_experts_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6135,7 +6145,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORDpr0c'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_procurement_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6147,7 +6157,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_hcm_technical_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6159,7 +6169,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_financials_accounting_hub_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6171,7 +6181,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_procure_to_pay_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6183,7 +6193,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_application_installation_and_patching_R9_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6195,7 +6205,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             development_in_fusion_applications_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6207,7 +6217,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_financials_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6231,7 +6241,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_accounts_receivable_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6243,7 +6253,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_financials_cloud_tax_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6255,7 +6265,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_apps_DBA_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6267,7 +6277,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_EBS_R12_inventory_order_management_and_purchasing_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6279,7 +6289,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_subledger_accounting_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6291,7 +6301,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_EBS_R12_functional_financial_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6303,7 +6313,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             OA_framework_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6315,7 +6325,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             R12_advanced_global_intercompany_system_AGIS_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6327,7 +6337,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_EBusiness_tax_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6339,7 +6349,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_demantra_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6351,7 +6361,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_HRMS_payroll_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6363,7 +6373,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_implement_configurator_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6375,7 +6385,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_project_accounting_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6387,7 +6397,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_advance_supply_chain_planning_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6399,7 +6409,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_financial_accounting_hub_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6411,7 +6421,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_business_intelligence_applications_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6435,7 +6445,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_adf_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6447,7 +6457,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_business_process_management_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6459,7 +6469,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_soa_BPEL_mediator_OBS_development_training_1_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6471,7 +6481,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_data_integrator_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6483,7 +6493,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_mobile_application_framework_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6495,7 +6505,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_java_xml_and_web_service_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6507,7 +6517,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_sql_and_plSQL_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6519,7 +6529,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_financials_integration_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6531,7 +6541,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_financials_security_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6543,7 +6553,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_financials_reporting_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6555,7 +6565,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_financials_approval_management_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6567,7 +6577,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_integration_cloud_Service_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6579,7 +6589,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_sales_cloud_extensibility_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6591,7 +6601,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_account_payable_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6603,7 +6613,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_general_ledger_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6627,7 +6637,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_project_portfolio_management_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6639,7 +6649,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_business_suit_fundamentals_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6651,7 +6661,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_R12_iprocurement_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6663,7 +6673,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_ebs_R12_service_contract_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6687,7 +6697,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_transportation_management_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6699,7 +6709,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_demantra_ptp_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6711,7 +6721,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_identity_management_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6723,7 +6733,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_access_manager_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6735,7 +6745,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_weblogic_administrator_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6747,7 +6757,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_entitlement_server_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6759,7 +6769,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_middleware_12C_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6771,7 +6781,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_goldengate_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6783,7 +6793,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_database_12C_advanced_admininstration_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6795,7 +6805,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_data_guard_administration_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6807,7 +6817,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             r12_approval_management_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6819,7 +6829,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             ebusiness_suit_development_erp_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6843,7 +6853,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             bi_publisher_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6855,7 +6865,7 @@ def joomla(customer_email):
             isFusion = False
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             ebs_techno_functional_training_single(isSelfPaced)
             ebs_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password)
@@ -6867,7 +6877,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_hcm_reporting_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6879,7 +6889,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_fusion_hcm_integration_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6891,7 +6901,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             fusion_security_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6903,7 +6913,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_taleo_recruting_and_onboarding_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6915,7 +6925,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_taleo_tcc_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6951,7 +6961,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             Siebel_openUI_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6963,7 +6973,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             hyperion_financials_management_hfm_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6975,7 +6985,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             hyperion_planning_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -6987,7 +6997,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             mastering_hyperion_calculation_manager_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -7000,7 +7010,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             obiee_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
@@ -7012,7 +7022,7 @@ def joomla(customer_email):
             isFusion = True
             isPackage = False
             isSelfPaced = None
-            single_training_password = 'REDACTED_TRAINING_PASSWORD'
+            single_training_password = TRAINING_PASSWORDS.get(sku, '')
             oracle_workflow_training_single(isSelfPaced)
             fusion_email(customer_name, customer_username, random_password, customer_email, sku, isPackage,
                          single_training_password, isFusion)
